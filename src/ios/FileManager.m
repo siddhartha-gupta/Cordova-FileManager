@@ -1,6 +1,6 @@
 //
 //  FileManager.m
-//
+//  
 //
 //  Created by Siddhartha Gupta on 07/12/14.
 //
@@ -8,13 +8,23 @@
 
 #import <Foundation/Foundation.h>
 #import "FileManager.h"
-#import <sys/xattr.h>
 
 @implementation FileManager
 
-- (void)addSkipBackupAttributeToPath:(NSString*)path {
-    u_int8_t b = 1;
-    setxattr([path fileSystemRepresentation], "com.apple.MobileBackup", &b, 1, 0, 0);
+-(void)documentsPath:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = nil;
+
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[paths objectAtIndex:0]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+-(void)libraryPath:(CDVInvokedUrlCommand*)command {
+    CDVPluginResult* pluginResult = nil;
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES);
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[paths objectAtIndex:0]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)checkFileExist:(CDVInvokedUrlCommand*)command {
@@ -33,13 +43,13 @@
 
 - (void)moveFile:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
-    
+
     NSString* sourcePath = [command.arguments objectAtIndex:0];
     NSString* targetPath = [command.arguments objectAtIndex:1];
     NSError* error = nil;
     NSString *errorDesc = @"";
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    
+
     if ([fileManager fileExistsAtPath:targetPath]) {
         [fileManager copyItemAtPath:sourcePath toPath:targetPath error:&error];
         if (error) {
@@ -65,13 +75,13 @@
 
 - (void)copyFile:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
-    
+
     NSString* sourcePath = [command.arguments objectAtIndex:0];
     NSString* targetPath = [command.arguments objectAtIndex:1];
     NSError* error = nil;
     NSString *errorDesc = @"";
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    
+
     if ([fileManager fileExistsAtPath:targetPath]) {
         [fileManager copyItemAtPath:sourcePath toPath:targetPath error:&error];
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:targetPath];
@@ -90,7 +100,7 @@
 
 - (void)renameFile:(CDVInvokedUrlCommand*)command {
     CDVPluginResult* pluginResult = nil;
-    
+
     NSString* source = [command.arguments objectAtIndex:0];
     NSString* newFilename = [command.arguments objectAtIndex:1];
     NSError* error;
